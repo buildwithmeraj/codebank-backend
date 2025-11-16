@@ -158,14 +158,15 @@ async function run() {
       }
     });
 
-    // delete a category
+    // delete a category and its associated codes
     app.delete("/categories/:id", verifyFireBaseToken, async (req, res) => {
-      const id = req.params.id;
+      const id = req.params.id; // The category ID from the URL
       const currentUserEmail = req.token_email;
-      const query = { _id: new ObjectId(id) };
+      const categoryQuery = { _id: new ObjectId(id) }; // Mongo query to find the category
 
       try {
-        const category = await categoriesCollection.findOne(query);
+        // Fetch the category to check its existence and ownership
+        const category = await categoriesCollection.findOne(categoryQuery);
 
         if (!category) {
           return res.status(404).send({ message: "Category not found" });
@@ -176,10 +177,33 @@ async function run() {
             message: "You are not authorized to delete this category",
           });
         }
-        const result = await categoriesCollection.deleteOne(query);
-        res.send(result);
+
+        // Delete all codes related to this category by using the category's _id
+        const codesQuery = { categoryId: id }; // Assuming categoryId is the field
+        const deleteCodesResult = await codesCollection.deleteMany(codesQuery); // Delete all related codes
+
+        if (deleteCodesResult.deletedCount === 0) {
+          console.log("No codes found for this category to delete.");
+        } else {
+          console.log(`${deleteCodesResult.deletedCount} codes deleted.`);
+        }
+
+        // Now delete the category itself
+        const deleteCategoryResult = await categoriesCollection.deleteOne(
+          categoryQuery
+        );
+
+        if (deleteCategoryResult.deletedCount === 0) {
+          return res
+            .status(404)
+            .send({ message: "Category not found or already deleted" });
+        }
+
+        res.send({
+          message: "Category and associated codes deleted successfully",
+        });
       } catch (error) {
-        console.error("Error deleting category:", error);
+        console.error("Error deleting category and codes:", error);
         res.status(500).send({ message: "Internal server error" });
       }
     });
@@ -224,7 +248,6 @@ async function run() {
       }
       const cursor = codesCollection.countDocuments(query);
       const result = await cursor;
-      console.log("codes ", result);
       res.send(result);
     });
 
