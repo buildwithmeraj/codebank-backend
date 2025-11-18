@@ -157,37 +157,6 @@ Authorization: Bearer <your_jwt_token>
 }
 ```
 
-## 📁 Project Structure
-
-```
-codebank-backend/
-├── src/
-│   ├── config/           # Configuration files
-│   │   └── db.js
-│   ├── controllers/      # Route controllers
-│   │   ├── authController.js
-│   │   ├── snippetController.js
-│   │   └── userController.js
-│   ├── models/           # Mongoose models
-│   │   ├── User.js
-│   │   └── Snippet.js
-│   ├── routes/           # API routes
-│   │   ├── auth.js
-│   │   ├── snippets.js
-│   │   └── users.js
-│   ├── middleware/       # Custom middleware
-│   │   ├── auth.js
-│   │   ├── errorHandler.js
-│   │   └── validation.js
-│   ├── utils/            # Utility functions
-│   │   └── helpers.js
-│   └── app.js           # Express app setup
-├── .env                  # Environment variables
-├── .gitignore
-├── package.json
-└── server.js            # Entry point
-```
-
 ## 📜 Scripts
 
 ```bash
