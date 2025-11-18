@@ -18,10 +18,16 @@ admin.initializeApp({
 
 // middleware
 app.use(
-  cors({
-    origin: "https://codebank.meraj.pro",
-    credentials: true,
-  })
+  cors(
+    // {
+    //   origin: "https://codebank.meraj.pro",
+    //   credentials: true,
+    // },
+    {
+      origin: "http://localhost:5173",
+      credentials: true,
+    }
+  )
 );
 app.use(express.json());
 
@@ -280,6 +286,28 @@ app.get("/total-codes", verifyFireBaseToken, async (req, res) => {
     res.send({ count: result });
   } catch (error) {
     console.error("Error:", error);
+    res.status(500).send({ message: "Internal server error" });
+  }
+});
+
+// get all codes for current user (for search functionality)
+app.get("/all-codes", verifyFireBaseToken, async (req, res) => {
+  try {
+    const { codesCollection } = await connectDB();
+    const currentUserEmail = req.token_email;
+
+    if (!currentUserEmail) {
+      return res
+        .status(401)
+        .send({ message: "Unauthorized. No email provided." });
+    }
+
+    const query = { email: currentUserEmail };
+    const cursor = codesCollection.find(query);
+    const result = await cursor.toArray();
+    res.send(result);
+  } catch (error) {
+    console.error("Error fetching all codes:", error);
     res.status(500).send({ message: "Internal server error" });
   }
 });
