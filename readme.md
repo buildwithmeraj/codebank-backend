@@ -1,208 +1,89 @@
-# 🏦 CodeBank - Backend API
+# CodeBank Backend
 
-A robust RESTful API backend for CodeBank, a modern code snippet management system built with Node.js, Express, and MongoDB.
+Simple Express + MongoDB backend for managing categories and code snippets with Firebase token verification.
 
-## 📋 Table of Contents
+## Live Site
 
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Prerequisites](#-prerequisites)
-- [Installation](#-installation)
-- [Environment Variables](#-environment-variables)
-- [API Documentation](#-api-documentation)
-- [Project Structure](#-project-structure)
-- [Scripts](#-scripts)
-- [Contributing](#-contributing)
-- [License](#-license)
+- Client: https://codebank.meraj.pro
+- Server: https://codebank-api.vercel.app/
 
-## ✨ Features
+## What It Does
 
-- 🔐 **Authentication & Authorization** - Secure JWT-based authentication
-- 📝 **Code Snippet Management** - Create, read, update, and delete code snippets
-- 🏷️ **Tagging System** - Organize snippets with tags and categories
-- 🔍 **Search Functionality** - Full-text search for code snippets
-- 👥 **User Management** - User registration, profile management
-- 📊 **Syntax Highlighting Support** - Multiple programming languages
-- 🔒 **Security** - Password hashing, rate limiting, CORS protection
-- ⚡ **Performance** - Optimized MongoDB queries with indexing
+- Category CRUD for authenticated users
+- Code snippet CRUD under categories
+- Per-user data isolation using verified Firebase email
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- **Runtime:** Node.js
-- **Framework:** Express.js
-- **Database:** MongoDB
-- **ODM:** Mongoose
-- **Authentication:** JWT (JSON Web Tokens)
-- **Validation:** Express Validator / Joi
-- **Security:** Helmet, CORS, bcrypt
+- Node.js
+- Express
+- MongoDB (`mongodb` driver)
+- Firebase Admin SDK
 
-## 📦 Prerequisites
+## Setup
 
-Before you begin, ensure you have the following installed:
-
-- Node.js (v14 or higher)
-- npm or yarn
-- MongoDB (v4.4 or higher)
-
-## 🚀 Installation
-
-1. **Clone the repository**
-
-```bash
-git clone https://github.com/buildwithmeraj/codebank-backend.git
-cd codebank-backend
-```
-
-2. **Install dependencies**
+1. Install dependencies:
 
 ```bash
 npm install
-# or
-yarn install
 ```
 
-3. **Set up environment variables**
-
-Create a `.env` file in the root directory (see [Environment Variables](#-environment-variables))
-
-4. **Start the development server**
-
-```bash
-npm run dev
-# or
-yarn dev
-```
-
-The server should now be running on `http://localhost:5000` (or your configured port)
-
-## 🔑 Environment Variables
-
-Create a `.env` file in the root directory with the following variables:
+2. Create/update `.env` in project root:
 
 ```env
-# Server Configuration
 PORT=5000
-NODE_ENV=development
-
-# Database
-MONGODB_URI=mongodb://localhost:27017/codebank
-# or for MongoDB Atlas:
-# MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/codebank
-
-# JWT Secret
-JWT_SECRET=your_super_secret_jwt_key_here
-JWT_EXPIRE=7d
-
-# CORS
-CLIENT_URL=http://localhost:3000
-
-# Optional: Email Configuration (for password reset, etc.)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your_email@gmail.com
-SMTP_PASS=your_app_password
+mongodb_uri=your_mongodb_connection_string
+FB_SERVICE_KEY=your_base64_encoded_firebase_service_account_json
+CLIENT_URL=http://localhost:5173
 ```
 
-## 📚 API Documentation
-
-### Base URL
-
-```
-http://localhost:5000/api/v1
-```
-
-### Authentication Endpoints
-
-| Method | Endpoint         | Description         |
-| ------ | ---------------- | ------------------- |
-| POST   | `/auth/register` | Register a new user |
-| POST   | `/auth/login`    | Login user          |
-| GET    | `/auth/me`       | Get current user    |
-| POST   | `/auth/logout`   | Logout user         |
-
-### Snippet Endpoints
-
-| Method | Endpoint           | Description        | Auth Required |
-| ------ | ------------------ | ------------------ | ------------- |
-| GET    | `/snippets`        | Get all snippets   | ✅            |
-| GET    | `/snippets/:id`    | Get single snippet | ✅            |
-| POST   | `/snippets`        | Create new snippet | ✅            |
-| PUT    | `/snippets/:id`    | Update snippet     | ✅            |
-| DELETE | `/snippets/:id`    | Delete snippet     | ✅            |
-| GET    | `/snippets/search` | Search snippets    | ✅            |
-
-### User Endpoints
-
-| Method | Endpoint              | Description         | Auth Required |
-| ------ | --------------------- | ------------------- | ------------- |
-| GET    | `/users/profile`      | Get user profile    | ✅            |
-| PUT    | `/users/profile`      | Update profile      | ✅            |
-| GET    | `/users/:id/snippets` | Get user's snippets | ✅            |
-
-### Example Request
-
-**Create a new snippet:**
+3. Start server:
 
 ```bash
-POST /api/v1/snippets
-Content-Type: application/json
-Authorization: Bearer <your_jwt_token>
-
-{
-  "title": "React useState Hook",
-  "description": "Basic example of useState hook",
-  "code": "const [count, setCount] = useState(0);",
-  "language": "javascript",
-  "tags": ["react", "hooks", "javascript"]
-}
+node index.js
 ```
 
-## 📜 Scripts
+Server runs at `http://localhost:5000` by default.
 
-```bash
-# Start development server with nodemon
-npm run dev
+## Environment Variables
 
-# Start production server
-npm start
+- `PORT`: Server port
+- `mongodb_uri`: MongoDB connection URI
+- `FB_SERVICE_KEY`: Base64-encoded Firebase Admin service account JSON
+- `CLIENT_URL`: Allowed CORS origin
 
-# Run tests
-npm test
+## API Routes
 
-# Lint code
-npm run lint
+### Health
 
-# Format code
-npm run format
-```
+- `GET /`
 
-## 🤝 Contributing
+### Categories
 
-Contributions are welcome! Please follow these steps:
+- `GET /categories`
+- `GET /total-categories`
+- `GET /category/:id`
+- `POST /categories`
+- `PATCH /categories/:id`
+- `DELETE /categories/:id`
 
-1. Fork the repository
-2. Create a new branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+### Codes
 
-## 📄 License
+- `GET /codes/:id` (all codes in a category)
+- `GET /total-codes`
+- `GET /all-codes`
+- `GET /code/:id`
+- `POST /codes/:id`
+- `PATCH /codes/:id`
+- `DELETE /codes/:id`
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## Auth
 
-## 👤 Author
+All routes except `GET /` require:
 
-**Merajul Islam**
+- `Authorization: Bearer <firebase_id_token>`
 
-- Portfolio: [meraj.pro](https://meraj.pro)
-- GitHub: [@buildwithmeraj](https://github.com/buildwithmeraj)
-- Email: buildwithmeraj@gmail.com
+## Notes
 
-## 🙏 Acknowledgments
-
-- Thanks to all contributors who helped build this project
-- Inspired by modern code snippet management tools
-
----
-
-<p align="center">Made with ❤️ by Merajul Islam</p>
+- Route IDs must be valid MongoDB ObjectIds.
+- Code documents are linked to categories with `categoryId`.

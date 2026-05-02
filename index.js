@@ -4,6 +4,7 @@ require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 3000;
+const corsOrigin = process.env.CLIENT_URL || "http://localhost:5173";
 
 const admin = require("firebase-admin");
 
@@ -24,12 +25,14 @@ app.use(
     //   credentials: true,
     // },
     {
-      origin: "http://localhost:5173",
+      origin: corsOrigin,
       credentials: true,
     }
   )
 );
 app.use(express.json());
+
+const isValidObjectId = (id) => ObjectId.isValid(id);
 
 const verifyFireBaseToken = async (req, res, next) => {
   const authorization = req.headers.authorization;
@@ -123,6 +126,9 @@ app.get("/category/:id", verifyFireBaseToken, async (req, res) => {
     const { categoriesCollection } = await connectDB();
     const id = req.params.id;
     const currentUserEmail = req.token_email;
+    if (!isValidObjectId(id)) {
+      return res.status(400).send({ message: "Invalid category id" });
+    }
 
     const category = await categoriesCollection.findOne({
       _id: new ObjectId(id),
@@ -165,6 +171,9 @@ app.patch("/categories/:id", verifyFireBaseToken, async (req, res) => {
     const id = req.params.id;
     const updatedCategory = req.body;
     const currentUserEmail = req.token_email;
+    if (!isValidObjectId(id)) {
+      return res.status(400).send({ message: "Invalid category id" });
+    }
 
     const category = await categoriesCollection.findOne({
       _id: new ObjectId(id),
@@ -202,6 +211,9 @@ app.delete("/categories/:id", verifyFireBaseToken, async (req, res) => {
     const { categoriesCollection, codesCollection } = await connectDB();
     const id = req.params.id;
     const currentUserEmail = req.token_email;
+    if (!isValidObjectId(id)) {
+      return res.status(400).send({ message: "Invalid category id" });
+    }
     const categoryQuery = { _id: new ObjectId(id) };
 
     const category = await categoriesCollection.findOne(categoryQuery);
@@ -248,6 +260,9 @@ app.get("/codes/:id", verifyFireBaseToken, async (req, res) => {
     const { categoriesCollection, codesCollection } = await connectDB();
     const categoryId = req.params.id;
     const currentUserEmail = req.token_email;
+    if (!isValidObjectId(categoryId)) {
+      return res.status(400).send({ message: "Invalid category id" });
+    }
 
     if (!currentUserEmail) {
       return res
@@ -318,6 +333,9 @@ app.get("/code/:id", verifyFireBaseToken, async (req, res) => {
     const { codesCollection } = await connectDB();
     const id = req.params.id;
     const currentUserEmail = req.token_email;
+    if (!isValidObjectId(id)) {
+      return res.status(400).send({ message: "Invalid code id" });
+    }
 
     const code = await codesCollection.findOne({
       _id: new ObjectId(id),
@@ -345,8 +363,12 @@ app.post("/codes/:id", verifyFireBaseToken, async (req, res) => {
     const { categoriesCollection, codesCollection } = await connectDB();
     const categoryId = req.params.id;
     const currentUserEmail = req.token_email;
+    if (!isValidObjectId(categoryId)) {
+      return res.status(400).send({ message: "Invalid category id" });
+    }
     const newCode = req.body;
     newCode.email = currentUserEmail;
+    newCode.categoryId = categoryId;
 
     const category = await categoriesCollection.findOne({
       _id: new ObjectId(categoryId),
@@ -374,6 +396,9 @@ app.patch("/codes/:id", verifyFireBaseToken, async (req, res) => {
     const id = req.params.id;
     const updatedCode = req.body;
     const currentUserEmail = req.token_email;
+    if (!isValidObjectId(id)) {
+      return res.status(400).send({ message: "Invalid code id" });
+    }
 
     const code = await codesCollection.findOne({
       _id: new ObjectId(id),
@@ -411,6 +436,9 @@ app.delete("/codes/:id", verifyFireBaseToken, async (req, res) => {
     const { codesCollection } = await connectDB();
     const id = req.params.id;
     const currentUserEmail = req.token_email;
+    if (!isValidObjectId(id)) {
+      return res.status(400).send({ message: "Invalid code id" });
+    }
     const query = { _id: new ObjectId(id) };
 
     const code = await codesCollection.findOne(query);
