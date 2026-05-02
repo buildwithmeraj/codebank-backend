@@ -9,7 +9,7 @@ const corsOrigin = process.env.CLIENT_URL || "http://localhost:5173";
 const admin = require("firebase-admin");
 
 const decoded = Buffer.from(process.env.FB_SERVICE_KEY, "base64").toString(
-  "utf8"
+  "utf8",
 );
 const serviceAccount = JSON.parse(decoded);
 
@@ -27,8 +27,8 @@ app.use(
     {
       origin: corsOrigin,
       credentials: true,
-    }
-  )
+    },
+  ),
 );
 app.use(express.json());
 
@@ -86,7 +86,72 @@ async function connectDB() {
 }
 
 app.get("/", (req, res) => {
-  res.send("Smart server is running");
+  res.send(`
+    <!doctype html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>CodeBank API</title>
+        <style>
+          :root {
+            color-scheme: light;
+          }
+          * {
+            box-sizing: border-box;
+          }
+          body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f4f9ff 0%, #e8f6ee 100%);
+            color: #0f172a;
+            padding: 24px;
+          }
+          .card {
+            width: min(680px, 100%);
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 16px;
+            padding: 28px 24px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+          }
+          h1 {
+            margin: 0 0 10px;
+            font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+          }
+          p {
+            margin: 0;
+            color: #334155;
+            line-height: 1.6;
+          }
+          a {
+            display: inline-block;
+            margin-top: 16px;
+            text-decoration: none;
+            font-weight: 600;
+            color: #ffffff;
+            background: #525CFA;
+            padding: 10px 16px;
+            border-radius: 10px;
+          }
+          a:hover {
+            background: #525CFA;
+          }
+        </style>
+      </head>
+      <body>
+        <main class="card">
+          <h1>CodeBank API is running</h1>
+          <p>This is the backend service. Please visit the client app to use CodeBank.</p>
+          <a href="${corsOrigin}" target="_blank" rel="noopener noreferrer">Open Client App</a>
+        </main>
+      </body>
+    </html>
+  `);
 });
 
 // categories APIs
@@ -233,9 +298,8 @@ app.delete("/categories/:id", verifyFireBaseToken, async (req, res) => {
 
     console.log(`${deleteCodesResult.deletedCount} codes deleted.`);
 
-    const deleteCategoryResult = await categoriesCollection.deleteOne(
-      categoryQuery
-    );
+    const deleteCategoryResult =
+      await categoriesCollection.deleteOne(categoryQuery);
 
     if (deleteCategoryResult.deletedCount === 0) {
       return res
